@@ -1,3 +1,5 @@
+import shutil
+
 def main():
     advance = False
     while not advance:
@@ -34,14 +36,23 @@ def main():
                 # Start of actually reading data
                 current_line = library.readline()
                 current_song = ""
-                current_line_number = 8
-                while current_line != "	<key>Playlists</key>\n":
-                    if current_line.find("Name") != -1:
+                current_id = 0
+                current_song_location = ""
+                all_songs = {}
+
+                while current_line != "	<key>Playlists</key>\n":  # Kept like this in case for whatever reason a song name is Playlists
+                    if current_line.find("Track ID") == 8:
+                        current_id = current_line[current_line.find("integer") + 8 : current_line.find("</integer>")]
+                    if current_line.find("Name") == 8:
                         current_song = current_line[current_line.find("string") + 7:current_line.find("</string>")]
-                        print(current_song)
-                    current_line_number += 1 
+                    if current_line.find("Location") == 8:
+                        current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
+                        all_songs.update({current_id: {current_song : current_song_location}})
+
                     current_line = library.readline()
 
+                library.close()
+                    
 
 
 if __name__ == "__main__":
