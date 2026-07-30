@@ -11,3 +11,6 @@ To start, you will need to export your library as a .xml through iTunes. In iTun
 ![Image showing how to export your library as an xml](readme_images/export.png)
 
 Be sure to put this xml file in a place that you will know where it is at.
+
+# Broken things
+Any song using the "Open Stream" will currently throw an error. Try to avoid having any songs in your library like that.

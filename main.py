@@ -1,4 +1,5 @@
 import shutil
+from urllib.parse import unquote
 
 def main():
     advance = False
@@ -32,6 +33,8 @@ def main():
                 elif correct == "N" or correct == "n":
                     advance = False
                     library.close()
+
+                output_location = input("Please provide the location to output all songs: ") 
                     
                 # Start of actually reading data
                 current_line = library.readline()
@@ -42,18 +45,24 @@ def main():
 
                 while current_line != "	<key>Playlists</key>\n":  # Kept like this in case for whatever reason a song name is Playlists
                     if current_line.find("Track ID") == 8:
+                        # ID used in playlists
                         current_id = current_line[current_line.find("integer") + 8 : current_line.find("</integer>")]
                     if current_line.find("Name") == 8:
                         current_song = current_line[current_line.find("string") + 7:current_line.find("</string>")]
                     if current_line.find("Location") == 8:
                         current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
-                        all_songs.update({current_id: {current_song : current_song_location}})
+                        current_song_location = unquote(current_song_location)
+                        if current_song_location.find('file://localhost/') != -1:
+                            current_song_location = current_song_location[17:]
+                        all_songs.update({current_id: {"name" : current_song, "location" :  current_song_location}})
 
                     current_line = library.readline()
 
                 library.close()
-                    
-
+                
+                for song in all_songs:
+                    print(all_songs[song]["location"])
+                    shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
 
 if __name__ == "__main__":
     main()
