@@ -1,5 +1,6 @@
 import shutil
 from urllib.parse import unquote
+import os
 
 def main():
     advance = False
@@ -28,41 +29,58 @@ def main():
                     correct = input("Please type Y or N: ")
                     print(correct)
 
-                if correct == "Y" or correct == "y":
-                    advance = True
-                elif correct == "N" or correct == "n":
+                if correct == "N" or correct == "n":
                     advance = False
                     library.close()
+                elif correct == "Y" or correct == "y":
+                    advance = True
 
-                output_location = input("Please provide the location to output all songs: ") 
-                    
-                # Start of actually reading data
-                current_line = library.readline()
-                current_song = ""
-                current_id = 0
-                current_song_location = ""
-                all_songs = {}
-
-                while current_line != "	<key>Playlists</key>\n":  # Kept like this in case for whatever reason a song name is Playlists
-                    if current_line.find("Track ID") == 8:
-                        # ID used in playlists
-                        current_id = current_line[current_line.find("integer") + 8 : current_line.find("</integer>")]
-                    if current_line.find("Name") == 8:
-                        current_song = current_line[current_line.find("string") + 7:current_line.find("</string>")]
-                    if current_line.find("Location") == 8:
-                        current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
-                        current_song_location = unquote(current_song_location)
-                        if current_song_location.find('file://localhost/') != -1:
-                            current_song_location = current_song_location[17:]
-                        all_songs.update({current_id: {"name" : current_song, "location" :  current_song_location}})
-
+                    output_location = input("Please provide the location to output all songs: ") 
+                        
+                    # Start of actually reading data
                     current_line = library.readline()
+                    current_song = ""
+                    current_id = 0
+                    current_song_location = ""
+                    current_album = ""
+                    current_album_f = ""
+                    all_songs = {}
 
-                library.close()
-                
-                for song in all_songs:
-                    print(all_songs[song]["location"])
-                    shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                    while current_line != "	<key>Playlists</key>\n":  # Kept like this in case for whatever reason a song name is Playlists
+                        if current_line.find("Track ID") == 8:
+                            # ID used in playlists
+                            current_id = current_line[current_line.find("integer") + 8 : current_line.find("</integer>")]
+
+                        if current_line.find("Name") == 8:
+                            current_song = current_line[current_line.find("string") + 7:current_line.find("</string>")]
+
+                        if current_line.find("Album</key>") == 8:
+                            current_album_f = ""
+                            current_album = current_line[current_line.find("string") + 7:current_line.find("</string>")]
+                            for letter in current_album:
+                                if letter.isalnum() or letter.isspace():
+                                    current_album_f = current_album_f + letter
+                            print(current_album_f)
+
+                        if current_line.find("Location") == 8:
+                            current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
+                            current_song_location = unquote(current_song_location)
+                            if current_song_location.find('file://localhost/') != -1:
+                                current_song_location = current_song_location[17:]
+                            all_songs.update({current_id: {"name" : current_song, "album" : current_album_f, "location" :  current_song_location}})
+
+                        current_line = library.readline()
+
+                    library.close()
+                    
+                    for song in all_songs:
+                        # print(all_songs[song]["location"])
+                        # print(output_location + all_songs[song]["album"])
+                        if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
+                            os.makedirs(output_location + all_songs[song]["album"] + "/")
+                        shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+
+
 
 if __name__ == "__main__":
     main()
