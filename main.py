@@ -1,6 +1,7 @@
 import shutil
 from urllib.parse import unquote
 import os
+import time
 
 def main():
     advance = False
@@ -58,9 +59,9 @@ def main():
                             current_album_f = ""
                             current_album = current_line[current_line.find("string") + 7:current_line.find("</string>")]
                             for letter in current_album:
+                                # Removes any characters that may cause issues in the directory name
                                 if letter.isalnum() or letter.isspace():
                                     current_album_f = current_album_f + letter
-                            print(current_album_f)
 
                         if current_line.find("Location") == 8:
                             current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
@@ -72,13 +73,47 @@ def main():
                         current_line = library.readline()
 
                     library.close()
-                    
+    select_type = input("How would you like to export these tracks?"
+                                   "\n1: All tracks in library\n2: Select by album\n")
+    if select_type == "1":
+        for song in all_songs:
+            if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
+                os.makedirs(output_location + all_songs[song]["album"] + "/")
+            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+
+    if select_type == "2":
+        # Get list of all albums
+        album_list = []
+        for song in all_songs:
+            if all_songs[song]["album"] not in album_list:
+                album_list.append(all_songs[song]["album"])
+        # Continue to ask user albums to copy
+        while True:
+            if len(album_list) == 0:
+                print("\nNo more albums left to copy!")
+                break
+            else:
+                print("\nAll albums:")
+                for i in range(len(album_list)):
+                    print(f"{i + 1}: {album_list[i]}")
+                selection = input("Please select one album to copy: ")
+            
+                if not selection.isdigit() or not int(selection) == float(selection)  or int(selection) <= 0 or int(selection) > len(album_list):
+                    print("Not a valid album number.")
+                    time.sleep(2)
+
+                else:
                     for song in all_songs:
-                        # print(all_songs[song]["location"])
-                        # print(output_location + all_songs[song]["album"])
-                        if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
-                            os.makedirs(output_location + all_songs[song]["album"] + "/")
-                        shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                        if all_songs[song]["album"] == album_list[i - 1]:
+                            if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
+                                os.makedirs(output_location + all_songs[song]["album"] + "/")
+                            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                    album_list.pop(i - 1)
+                
+                advance = input("Type Y to continue copying albums: ")
+                if not advance == "y" and not advance == "Y":
+                    break
+
 
 
 
