@@ -43,6 +43,8 @@ def main():
                     current_song = ""
                     current_id = 0
                     current_song_location = ""
+                    current_album_artist = ""
+                    current_album_artist_f = ""
                     current_album = ""
                     current_album_f = ""
                     all_songs = {}
@@ -54,6 +56,14 @@ def main():
 
                         if current_line.find("Name") == 8:
                             current_song = current_line[current_line.find("string") + 7:current_line.find("</string>")]
+
+                        if current_line.find("Album Artist</key>") == 8:
+                            current_album_artist_f = ""
+                            current_album_artist = current_line[current_line.find("string") + 7:current_line.find("</string")]
+                            for letter in current_album_artist:
+                                # Removes any characters that may cause issues in the directory name
+                                if letter.isalnum() or letter.isspace():
+                                    current_album_artist_f = current_album_artist_f + letter
 
                         if current_line.find("Album</key>") == 8:
                             current_album_f = ""
@@ -68,7 +78,7 @@ def main():
                             current_song_location = unquote(current_song_location)
                             if current_song_location.find('file://localhost/') != -1:
                                 current_song_location = current_song_location[17:]
-                            all_songs.update({current_id: {"name" : current_song, "album" : current_album_f, "location" :  current_song_location}})
+                            all_songs.update({current_id: {"name" : current_song, "artist" : current_album_artist_f, "album" : current_album_f, "location" :  current_song_location}})
 
                         current_line = library.readline()
 
@@ -77,9 +87,9 @@ def main():
                                    "\n1: All tracks in library\n2: Select by album\n")
     if select_type == "1":
         for song in all_songs:
-            if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
-                os.makedirs(output_location + all_songs[song]["album"] + "/")
-            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+            if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
+                os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
+            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
 
     if select_type == "2":
         # Get list of all albums
@@ -105,9 +115,9 @@ def main():
                 else:
                     for song in all_songs:
                         if all_songs[song]["album"] == album_list[i - 1]:
-                            if not os.path.exists(output_location + all_songs[song]["album"] + "/"):
-                                os.makedirs(output_location + all_songs[song]["album"] + "/")
-                            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                            if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
+                                os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
+                            shutil.copy2(all_songs[song]["location"], output_location  + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
                     album_list.pop(i - 1)
                 
                 advance = input("Type Y to continue copying albums: ")
