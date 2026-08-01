@@ -24,7 +24,7 @@ Be sure to put this xml file in a place that you will know where it is at.
 
 
 # Warnings
-* If your iTunes Library's music takes up more storage than what you have available at the target, it will likely fill up the space all the way before throwing an error.
+* If your iTunes Library's music takes up more storage than what you have available at the target, it will throw an error, any song copied before the space is filled will still be there, but any song after will not be.
 * Any song using the "Open Stream" will currently throw an error. Try to avoid having any songs in your library like that.
 * This tool will only properly work for music in your library. While Videos and other media may copy, it will not be viewable outside of iTunes or an Apple device due to DRM.
 * This is a work in progress, and as such, errors not mentioned here may show up.
