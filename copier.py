@@ -2,6 +2,7 @@ import shutil
 from urllib.parse import unquote
 import os
 import time
+import datetime
 
 
 def main():
@@ -100,7 +101,7 @@ def main():
             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
             shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-            print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
 
     elif select_type == "2":
         # Get list of all albums
@@ -129,7 +130,7 @@ def main():
                             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
                             shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-                            print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
                     album_list.pop(int(selection) - 1)
                 
                 advance = input("Type Y to continue copying albums: ")
@@ -203,7 +204,7 @@ def main():
                     # Song is formatted in ID number
                     for song in all_playlists[id_list[int(selection) - 1]]["songs"]:
                         shutil.copy2(all_songs[song]["location"], output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-                        print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                        print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
                         
                     playlist_list.pop(int(selection) - 1)
 
