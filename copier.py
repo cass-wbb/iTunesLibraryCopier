@@ -5,6 +5,13 @@ import time
 import datetime
 
 
+def print_file_not_found_errors(error_list):
+    if len(error_list) > 0:
+        print("\nFiles not found:")
+        for item in error_list:
+            print(item)
+
+
 def main():
     xml_path = input("Please input the path for the iTunes Library file: ")
 
@@ -66,6 +73,7 @@ def main():
                         # Removes any characters that may cause issues in the directory name
                         if letter.isalnum() or letter.isspace():
                             current_album_artist_f = current_album_artist_f + letter
+                    current_album_artist_f = current_album_artist_f.strip()
 
                 if current_line.find("Album</key>") == 8:
                     current_album_f = ""
@@ -74,6 +82,7 @@ def main():
                         # Removes any characters that may cause issues in the directory name
                         if letter.isalnum() or letter.isspace():
                             current_album_f = current_album_f + letter
+                    current_album_f = current_album_f.strip()
 
                 if current_line.find("Location") == 8:
                     current_song_location = current_line[current_line.find("string") + 7:current_line.find("</string>")]
@@ -94,14 +103,20 @@ def main():
 
                 current_line = library.readline()
 
+    files_not_found = []
     select_type = input("How would you like to export these tracks?"
                                 "\n1: All tracks in library\n2: Select by album\n3: Select by playlist\n")
     if select_type == "1":
         for song in all_songs:
             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
-            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+            if os.path.exists(all_songs[song]["location"]):
+                shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} copied from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+            else:
+                print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} file not found")
+                files_not_found.append(f"{all_songs[song]["name"]} - {all_songs[song]["location"]}")
+        print_file_not_found_errors(files_not_found)
 
     elif select_type == "2":
         # Get list of all albums
@@ -111,6 +126,7 @@ def main():
                 album_list.append(all_songs[song]["album"])
         # Continue to ask user albums to copy
         while True:
+            files_not_found.clear()
             if len(album_list) == 0:
                 print("\nNo more albums left to copy!")
                 break
@@ -129,8 +145,13 @@ def main():
                         if all_songs[song]["album"] == album_list[int(selection) - 1]:
                             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
-                            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-                            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                            if os.path.exists(all_songs[song]["location"]):
+                                shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                                print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} copied from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                            else:
+                                print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} file not found")
+                                files_not_found.append(f"{all_songs[song]["name"]} - {all_songs[song]["location"]}")
+                    print_file_not_found_errors(files_not_found)
                     album_list.pop(int(selection) - 1)
                 
                 advance = input("Type Y to continue copying albums: ")
@@ -153,6 +174,7 @@ def main():
 
             if current_line.find("Name") == 8:
                 playlist_name = current_line[current_line.find("string") + 7 : current_line.find("</string>")]
+                playlist_name = playlist_name.strip()
                 # Ignore default playlists
                 if not default_playlists.count(playlist_name) == 0:
                     ignore = True
@@ -198,14 +220,20 @@ def main():
                     time.sleep(2)
 
                 else:
+                    files_not_found.clear()
                     # Create path for playlist folder
                     if not os.path.exists(output_location + playlist_list[int(selection) - 1] + "/"):
                         os.makedirs(output_location + playlist_list[int(selection) - 1] + "/")
                     # Song is formatted in ID number
                     for song in all_playlists[id_list[int(selection) - 1]]["songs"]:
-                        shutil.copy2(all_songs[song]["location"], output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
-                        print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
-                        
+                        if os.path.exists(all_songs[song]["location"]):
+                            shutil.copy2(all_songs[song]["location"], output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} copied from {all_songs[song]["location"]} to {output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                        else:
+                            print(f"{datetime.datetime.now()} - {all_songs[song]["name"]} file not found")
+                            files_not_found.append(f"{all_songs[song]["name"]} - {all_songs[song]["location"]}")
+                    print_file_not_found_errors(files_not_found)
+
                     playlist_list.pop(int(selection) - 1)
 
                     advance = input("Type Y to continue copying playlists: ")
