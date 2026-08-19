@@ -3,9 +3,8 @@ from urllib.parse import unquote
 import os
 import time
 
+
 def main():
-    # advance = False
-    # while not advance:
     xml_path = input("Please input the path for the iTunes Library file: ")
 
     with open(xml_path, "r", encoding='utf-8', errors='ignore') as library:
@@ -23,16 +22,7 @@ def main():
             # Show user the date and time this xml file was generated, if it is not correct, they can find the correct one
             date_generated = library.readline()[22:-9]
             print("Database file generated on " + date_generated[:10] + " at " + date_generated[11:] + " UTC")
-
-            # correct = input("Is this the correct file? Y or N: ")
-            # if (correct != "Y" and correct != "y" and correct != "N" and correct != "n"):
-            #     correct = input("Please type Y or N: ")
-
-            # if correct == "N" or correct == "n":
-            #     advance = False
-            #     library.close()
-            # elif correct == "Y" or correct == "y":
-            #     advance = True
+            print("If this is not correct, please restart.")
 
             output_location = input("Please provide the location to output all songs: ") 
             if not output_location.rfind("/") == len(output_location) - 1 and not output_location.rfind("\\") == len(output_location) -1:
@@ -110,6 +100,7 @@ def main():
             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
             shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+            print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
 
     elif select_type == "2":
         # Get list of all albums
@@ -137,7 +128,8 @@ def main():
                         if all_songs[song]["album"] == album_list[int(selection) - 1]:
                             if not os.path.exists(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/"):
                                 os.makedirs(output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/")
-                            shutil.copy2(all_songs[song]["location"], output_location  + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                            shutil.copy2(all_songs[song]["location"], output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                            print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + all_songs[song]["artist"] + "/" + all_songs[song]["album"] + "/" +  all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
                     album_list.pop(int(selection) - 1)
                 
                 advance = input("Type Y to continue copying albums: ")
@@ -211,6 +203,8 @@ def main():
                     # Song is formatted in ID number
                     for song in all_playlists[id_list[int(selection) - 1]]["songs"]:
                         shutil.copy2(all_songs[song]["location"], output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):])
+                        print(f"{all_songs[song]["name"]} moved from {all_songs[song]["location"]} to {output_location + playlist_list[int(selection) - 1] + "/" + all_songs[song]["location"][all_songs[song]["location"].rfind("/"):]}")
+                        
                     playlist_list.pop(int(selection) - 1)
 
                     advance = input("Type Y to continue copying playlists: ")
